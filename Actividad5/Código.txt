@@ -1,0 +1,126 @@
+# memory allocation algorithms
+
+# function to read file and return list of files
+def read_file(filename):
+    with open(filename, 'r') as file:
+        lines = file.readlines()
+        files = []
+        for line in lines:
+            filename, size = line.strip().split(',')
+            size = int(''.join(filter(str.isdigit, size)))  # remove non-numeric characters from size
+            files.append((filename, size))
+        return files
+
+# function to implement first fit algorithm
+def first_fit(files, memory_size):
+    memory = [0] * memory_size
+    allocation = {}
+    for filename, size in files:
+        for i in range(memory_size - size + 1):
+            if all(memory[i+j] == 0 for j in range(size)):
+                allocation[filename] = i
+                for j in range(size):
+                    memory[i+j] = 1
+                break
+    return allocation
+
+# function to implement best fit algorithm
+def best_fit(files, memory_size):
+    memory = [0] * memory_size
+    allocation = {}
+    for filename, size in files:
+        best_index = None
+        for i in range(memory_size - size + 1):
+            if all(memory[i+j] == 0 for j in range(size)):
+                if best_index is None or sum(memory[best_index:best_index+size]) > sum(memory[i:i+size]):
+                    best_index = i
+        if best_index is not None:
+            allocation[filename] = best_index
+            for j in range(size):
+                memory[best_index+j] = 1
+    return allocation
+
+# function to implement worst fit algorithm
+def worst_fit(files, memory_size):
+    memory = [0] * memory_size
+    allocation = {}
+    for filename, size in files:
+        worst_index = None
+        for i in range(memory_size - size + 1):
+            if all(memory[i+j] == 0 for j in range(size)):
+                if worst_index is None or sum(memory[worst_index:worst_index+size]) < sum(memory[i:i+size]):
+                    worst_index = i
+        if worst_index is not None:
+            allocation[filename] = worst_index
+            for j in range(size):
+                memory[worst_index+j] = 1
+    return allocation
+
+# function to implement next fit algorithm
+def next_fit(files, memory_size):
+    memory = [0] * memory_size
+    allocation = {}
+    i = 0
+    for filename, size in files:
+        j = i
+        while j < memory_size and (not all(memory[j:j+size])):
+            j += 1
+        if j < memory_size:
+            allocation[filename] = j
+            for k in range(size):
+                memory[j+k] = 1
+        else:
+            break
+        i = j
+    return allocation
+
+# main function to run the program
+def main():
+    # read file name and memory size from user
+    file_name = "archivos.txt"
+    memory_size = int(input("Enter the memory size: "))
+
+    # read the file and store the data in a dictionary
+    files = {}
+    with open(file_name, 'r') as f:
+        for line in f:
+            filename, weight = line.strip().split(',')
+            files[filename] = int(weight)
+
+    # initialize the memory with zeros
+    memory = [0] * memory_size
+
+    # allocate the memory using the selected algorithm
+    # ...
+
+    # get the algorithm to use
+    print("Choose an algorithm to use:")
+    print("1. First fit")
+    print("2. Best fit")
+    print("3. Worst fit")
+    print("4. Next fit")
+    choice = int(input("Enter your choice: "))                       
+    if choice == 1:
+       allocation = first_fit(files, memory_size)
+       algorithm = "First fit"
+    elif choice == 2:
+       allocation = best_fit(files, memory_size)
+       algorithm = "Best fit"
+    elif choice == 3:
+       allocation = worst_fit(files, memory_size)
+       algorithm = "Worst fit"
+    elif choice == 4:
+       allocation = next_fit(files, memory_size)
+       algorithm = "Next fit"
+    else:
+       print("Invalid choice")
+    # print the allocation
+    print(f"Using {algorithm} algorithm:")
+    print("File Name\tStarting Position")
+    for filename, position in allocation.items():
+        print(f"{filename}\t\t{position}")
+    print("Memory map:")
+    print(memory)
+
+# call the main function to run the program
+main()
